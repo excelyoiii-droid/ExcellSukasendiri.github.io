@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'modul_01/profile_screen.dart';
-
+import 'package:flutter_2/modul_02/academic_dashboard_screen.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const ProfileScreen(),
+      home: const AcademicDashboardScreen(),
     );
   }
 }
