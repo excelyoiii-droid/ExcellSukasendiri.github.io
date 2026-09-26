@@ -36,6 +36,7 @@ class TaskTile extends StatelessWidget {
         ),
         subtitle: Row(
           children: <Widget>[
+            Text(task.id),
             Icon(Icons.flag, size: 14, color: warna.primary),
             const SizedBox(width: 4),
             Text(_labelPrioritas(task.prioritas)),

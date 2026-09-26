@@ -5,6 +5,10 @@ class Task {
   final bool done;
   final String createdAt;
   final int prioritas; // 1 = Tinggi, 2 = Sedang, 3 = Rendah
+  static DateTime? bacaTanggal(Task t) {
+ final DateTime? tanggal = DateTime.tryParse(t.createdAt);
+ return tanggal;
+ }
 
   const Task({
     required this.id,

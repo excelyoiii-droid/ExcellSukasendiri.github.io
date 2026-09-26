@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 import '../services/task_storage.dart';
-
+import '../widgets/task_tile.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key, this.storage});
@@ -85,44 +85,22 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
     await _simpanDaftar(baru, daftarSebelumnya: sekarang);
   }
-    void _pesan(String teks) {
+
+  void _pesan(String teks) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
+      ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(teks)));
   }
 
-  String _rapikanPesan(Object error) {
-    return error.toString();
+  String _rapikanPesan(Object e) {
+    if (e is FormatException) return e.message;
+    final String s = e.toString();
+    return s.startsWith('Exception: ') ? s.substring('Exception: '.length) : s;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Daftar Tugas')),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Gagal memuat: ${_rapikanPesan(_error!)}'),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _muat,
-                child: const Text('Coba lagi'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final List<Task>? tugas = _tugas;
-    if (tugas == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daftar Tugas'),
@@ -138,17 +116,51 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: tugas.length,
-        itemBuilder: (context, index) {
-          final Task t = tugas[index];
-          return CheckboxListTile(
-            title: Text(t.title),
-            value: t.done,
-            onChanged: (_) => _ubahStatus(t),
-          );
-        },
+      body: _error != null
+          ? _tampilanError(_error!)
+          : _tugas == null
+              ? _tampilanMemuat()
+              : _tampilanDaftar(_tugas!),
+    );
+  }
+
+  Widget _tampilanMemuat() {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text('Memuat tugas dari penyimpanan...'),
+        ],
       ),
+    );
+  }
+
+  Widget _tampilanError(Object error) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('Gagal memuat: ${_rapikanPesan(error)}'),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: _muat,
+            child: const Text('Coba lagi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tampilanDaftar(List<Task> tugas) {
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 88),
+      itemCount: tugas.length,
+      itemBuilder: (BuildContext context, int i) {
+        final Task t = tugas[i];
+        return TaskTile(task: t, onToggle: _ubahStatus);
+      },
     );
   }
 }
